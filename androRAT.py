@@ -36,8 +36,8 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-if float(platform.python_version()[:3]) < 3.6 or float(platform.python_version()[:3]) > 3.8:
-    print(stdOutput("error") + "\033[1mPython version should be between 3.6 to 3.8")
+if float(platform.python_version()[:3]) < 3.6 or float(platform.python_version()[:3]) > 3.11:
+    print(stdOutput("error") + "\033[1mPython version should be between 3.6 to 3.11")
     sys.exit()
 
 # Part 2: End of AndroRAT.py
