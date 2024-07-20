@@ -54,3 +54,12 @@ if args.build:
         build(ip, port, args.output, True, port_, icon)
 
 # Part 3: End of androRAT.py
+# Part 4: Start of androRAT.py
+
+    else:
+        if args.ip and args.port:
+            build(args.ip, port_, args.output, False, None, icon)
+        else:
+            print(stdOutput("error") + "\033[1mArguments Missing")
+
+# Part 4: End of androRAT.py
