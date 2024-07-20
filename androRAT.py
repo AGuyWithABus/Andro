@@ -1,3 +1,5 @@
+# Part 1: Start of androRAT.py
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -11,8 +13,11 @@ except ImportError as e:
     print(stdOutput("error") + "\033[1mpyngrok not found")
     print(stdOutput("info") + "\033[1mRun pip3 install -r requirements.txt")
     exit()
-    
+
 clearDirec()
+
+# Part 1: End of androRAT.py
+# Part 2: Start of androRAT.py
 
 #                     _           _____         _______
 #     /\             | |         |  __ \     /\|__   __|
@@ -21,9 +26,6 @@ clearDirec()
 #  / ____ \| | | | (_| | | | (_) | | \ \  / ____ \| |   
 # /_/    \_\_| |_|\__,_|_|  \___/|_|  \_\/_/    \_\_|   
 #                                        - By karma9874
-
-# Part 1: End of AndroRAT.py
-# Part 2: Start of AndroRAT.py
 
 parser = argparse.ArgumentParser(usage="%(prog)s [--build] [--shell] [-i <IP> -p <PORT> -o <apk name>]")
 parser.add_argument('--build', help='For Building the apk', action='store_true')
@@ -35,12 +37,8 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-if float(platform.python_version()[:3]) < 3.6:
-    print(stdOutput("error") + "\033[1mPython version should be 3.6 or above")
-    sys.exit()
-
-# Part 2: End of AndroRAT.py
-# Part 3: Start of AndroRAT.py
+# Part 2: End of androRAT.py
+# Part 3: Start of androRAT.py
 
 if args.build:
     port_ = args.port
@@ -60,8 +58,8 @@ if args.build:
         else:
             print(stdOutput("error") + "\033[1mArguments Missing")
 
-# Part 3: End of AndroRAT.py
-# Part 4: Start of AndroRAT.py
+# Part 3: End of androRAT.py
+# Part 4: Start of androRAT.py
 
 if args.shell:
     if args.ip and args.port:
@@ -69,10 +67,9 @@ if args.shell:
     else:
         print(stdOutput("error") + "\033[1mArguments Missing")
 
-# Part 4: End of AndroRAT.py
-# Part 5: Start of AndroRAT.py
+# Part 4: End of androRAT.py
+# Part 5: Start of androRAT.py
 
-# Additional code for new features integration (if any)
-# Implemented in the utils.py file
+# End of androRAT.py
 
-# Part 5: End of AndroRAT.py
+# Part 5: End of androRAT.py
