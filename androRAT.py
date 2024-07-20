@@ -23,7 +23,6 @@ clearDirec()
 #                                        - By karma9874
 
 # Part 1: End of AndroRAT.py
-
 # Part 2: Start of AndroRAT.py
 
 parser = argparse.ArgumentParser(usage="%(prog)s [--build] [--shell] [-i <IP> -p <PORT> -o <apk name>]")
@@ -36,12 +35,11 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-if float(platform.python_version()[:3]) < 3.6 or float(platform.python_version()[:3]) > 3.11:
-    print(stdOutput("error") + "\033[1mPython version should be between 3.6 to 3.11")
+if float(platform.python_version()[:3]) < 3.6:
+    print(stdOutput("error") + "\033[1mPython version should be 3.6 or above")
     sys.exit()
 
 # Part 2: End of AndroRAT.py
-
 # Part 3: Start of AndroRAT.py
 
 if args.build:
@@ -63,7 +61,6 @@ if args.build:
             print(stdOutput("error") + "\033[1mArguments Missing")
 
 # Part 3: End of AndroRAT.py
-
 # Part 4: Start of AndroRAT.py
 
 if args.shell:
@@ -73,4 +70,9 @@ if args.shell:
         print(stdOutput("error") + "\033[1mArguments Missing")
 
 # Part 4: End of AndroRAT.py
+# Part 5: Start of AndroRAT.py
 
+# Additional code for new features integration (if any)
+# Implemented in the utils.py file
+
+# Part 5: End of AndroRAT.py
